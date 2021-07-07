@@ -43,7 +43,7 @@ export default {
     head() {
     return {
       script: [
-        {src: `https://maps.googleapis.com/maps/api/js?key=AIzaSyC7Dk2fOqlce1cTvJmJA_uoyM9RNZ1_uG4&libraries=places`}
+        //{src: `https://maps.googleapis.com/maps/api/js?key=AIzaSyC7Dk2fOqlce1cTvJmJA_uoyM9RNZ1_uG4&libraries=places`}
       ]
     };
   },
