@@ -1,33 +1,119 @@
 <template>
 <div>
     <Header></Header>
-    <div id="map" style="height:100vh;">
       <div class="card">
   <b-card
         header="Où pouvons-nous vous prendre en charge ?"
         header-bg-variant="primary"
         header-text-variant="white"
         align="center"
-        style="max-width: 20rem;"
+        style="max-width: 20rem; z-index: 1;"
     class="mb-2"
   >
-  <form @submit.prevent="signup">
     <b-card-text>
-      <b-form-input id="input-large" size="lg" placeholder="Spécifiez un lieu de prise en charge"></b-form-input>
-      {{distance}} Km
-    </b-card-text>
-  </form>
+          <input
+        id="origin-input"
+        type="text"
+        placeholder="Spécifiez un lieu de prise en charge"
+      />
 
-    <b-button @click="getLocalisation()" variant="primary">Get your location</b-button>
+      <input
+        id="destination-input"
+        type="text"
+        placeholder="Saissisez votre destination"
+      />
+     
+    </b-card-text>
+
+    <!-- <b-button @click="getLocalisation()" variant="primary">Get your location</b-button> -->
   </b-card>
 </div>
-    </div>
+      <div id="map" style="height:100vh;">
+  </div>
+
     
+
     <Footer></Footer>
 </div>
 </template>
 
 <script>
+class AutocompleteDirectionsHandler {
+  map;
+  originPlaceId;
+  destinationPlaceId;
+  travelMode;
+  directionsService;
+  directionsRenderer;
+  constructor(map) {
+    this.map = map;
+    this.originPlaceId = "";
+    this.destinationPlaceId = "";
+    this.travelMode = google.maps.TravelMode.DRIVING;
+    this.directionsService = new google.maps.DirectionsService();
+    this.directionsRenderer = new google.maps.DirectionsRenderer();
+    this.directionsRenderer.setMap(map);
+    const originInput = document.getElementById("origin-input");
+    const destinationInput = document.getElementById("destination-input");
+    const originAutocomplete = new google.maps.places.Autocomplete(originInput);
+    // Specify just the place data fields that you need.
+    originAutocomplete.setFields(["place_id"]);
+    originAutocomplete.setComponentRestrictions({
+    country: ["fr"],
+  });
+    const destinationAutocomplete = new google.maps.places.Autocomplete(
+      destinationInput
+    );
+    // Specify just the place data fields that you need.
+    destinationAutocomplete.setFields(["place_id"]);
+   
+    this.setupPlaceChangedListener(originAutocomplete, "ORIG");
+    this.setupPlaceChangedListener(destinationAutocomplete, "DEST");
+  
+  }
+ 
+
+  setupPlaceChangedListener(autocomplete, mode) {
+    autocomplete.bindTo("bounds", this.map);
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+
+      if (!place.place_id) {
+        window.alert("Please select an option from the dropdown list.");
+        return;
+      }
+
+      if (mode === "ORIG") {
+        this.originPlaceId = place.place_id;
+      } else {
+        this.destinationPlaceId = place.place_id;
+      }
+      this.route();
+    });
+  }
+  route() {
+    if (!this.originPlaceId || !this.destinationPlaceId) {
+      return;
+    }
+    const me = this;
+    this.directionsService.route(
+      {
+        origin: { placeId: this.originPlaceId },
+        destination: { placeId: this.destinationPlaceId },
+        travelMode: this.travelMode,
+      },
+      (response, status) => {
+        if (status === "OK") {
+          me.directionsRenderer.setDirections(response);
+        } else {
+          window.alert("Directions request failed due to " + status);
+        }
+      }
+    );
+  }
+}
+
+
 import Header from "../../components/header"
 import Footer from "../../components/footer"
 export default {
@@ -40,40 +126,25 @@ export default {
         distance:"",
       }
     },
-    head() {
-    return {
-      script: [
-        //{src: `https://maps.googleapis.com/maps/api/js?key=AIzaSyC7Dk2fOqlce1cTvJmJA_uoyM9RNZ1_uG4&libraries=places`}
-      ]
-    };
-  },
+    mounted(){    
+      this.initMap()
+    },
   beforeMount(){
-      this.googleMap()
+      // this.initMap()
   },
   methods: {
-        googleMap() {
-var mapVar= {
-	center:new google.maps.LatLng(40.774102,-73.971734),
-	zoom:15,
-	mapTypeId: 'roadmap'
-};
-var map = new google.maps.Map(document.getElementById("map"),mapVar)
-const dakota = {lat: 44.7767644, lng: -73.9761399}
-  const frick = {lat: 40.771209, lng: -73.9673991}
-var champ_elysees_Position = {lat: 48.869745,lng: 2.307946};
-var mk1 = new google.maps.Marker({position: dakota, map: map})
-var mk2 = new google.maps.Marker({position: frick, map: map})
-var line = new google.maps.Polyline({path: [dakota, frick], map: map})
- var R = 3958.8; // Radius of the Earth in miles
-      var rlat1 = mk1.position.lat() * (Math.PI/180); // Convert degrees to radians
-      var rlat2 = mk2.position.lat() * (Math.PI/180); // Convert degrees to radians
-      var difflat = rlat2-rlat1; // Radian difference (latitudes)
-      var difflon = (mk2.position.lng()-mk1.position.lng()) * (Math.PI/180); // Radian difference (longitudes)
-
-     var d = 2 * R * Math.asin(Math.sqrt(Math.sin(difflat/2)*Math.sin(difflat/2)+Math.cos(rlat1)*Math.cos(rlat2)*Math.sin(difflon/2)*Math.sin(difflon/2)));
-     d = d.toFixed(2)*1.6
-     this.distance = d.toFixed(2)
+        initMap() {
+ 
+  const map = new google.maps.Map(document.getElementById("map"), {
+    mapTypeControl: false,
+    center: { lat: -33.8688, lng: 151.2195 },
+    zoom: 13,
+  });
+new AutocompleteDirectionsHandler(map);
 },
+
+  
+ 
     getLocalisation(){
    var map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: -34.397, lng: 150.644 },
@@ -139,4 +210,6 @@ var line = new google.maps.Polyline({path: [dakota, frick], map: map})
     left: 3%;
     height: 83%;
 }
+
+      
 </style>

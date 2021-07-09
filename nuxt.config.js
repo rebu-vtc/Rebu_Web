@@ -31,7 +31,13 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
   ],
-
+  head() {
+    return {
+      script: [
+        {src: `https://maps.googleapis.com/maps/api/js?key=AIzaSyDJEZ6frZtg6DzKubVE1OCbLgL9hV0kJn0&libraries=places`}
+      ]
+    };
+  },
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/bootstrap
@@ -45,10 +51,7 @@ export default {
           },
       ]
    }],
-   ['nuxt-gmaps', {
-    key: 'AIzaSyC7Dk2fOqlce1cTvJmJA_uoyM9RNZ1_uG4',
-    
-  }]
+ 
     
   ],
   bootstrapVue: {
