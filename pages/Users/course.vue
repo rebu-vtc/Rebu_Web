@@ -9,6 +9,7 @@
         align="center"
         style="max-width: 20rem; z-index: 1;"
     class="mb-2"
+    id="titlecard"
   >
     <b-card-text>
           <input
@@ -25,7 +26,7 @@
      
     </b-card-text>
 
-    <!-- <b-button @click="getLocalisation()" variant="primary">Get your location</b-button> -->
+    <button id="commande" :disabled="isActive"  variant="primary">Commander votre Rebu</button>
   </b-card>
 </div>
       <div id="map" style="height:100vh;">
@@ -45,8 +46,10 @@ class AutocompleteDirectionsHandler {
   travelMode;
   directionsService;
   directionsRenderer;
-  constructor(map) {
+  isActive;
+  constructor(map,isActive) {
     this.map = map;
+    this.isActive = isActive
     this.originPlaceId = "";
     this.destinationPlaceId = "";
     this.travelMode = google.maps.TravelMode.DRIVING;
@@ -56,7 +59,6 @@ class AutocompleteDirectionsHandler {
     const originInput = document.getElementById("origin-input");
     const destinationInput = document.getElementById("destination-input");
     const originAutocomplete = new google.maps.places.Autocomplete(originInput);
-    // Specify just the place data fields that you need.
     originAutocomplete.setFields(["place_id"]);
     originAutocomplete.setComponentRestrictions({
     country: ["fr"],
@@ -64,7 +66,7 @@ class AutocompleteDirectionsHandler {
     const destinationAutocomplete = new google.maps.places.Autocomplete(
       destinationInput
     );
-    // Specify just the place data fields that you need.
+    
     destinationAutocomplete.setFields(["place_id"]);
    
     this.setupPlaceChangedListener(originAutocomplete, "ORIG");
@@ -88,7 +90,7 @@ class AutocompleteDirectionsHandler {
       } else {
         this.destinationPlaceId = place.place_id;
       }
-      this.route();
+      this.route()
     });
   }
   route() {
@@ -105,12 +107,17 @@ class AutocompleteDirectionsHandler {
       (response, status) => {
         if (status === "OK") {
           me.directionsRenderer.setDirections(response);
+          console.log(this.isActive)
+          this.isActive = false
+                    console.log(this.isActive)
+
         } else {
           window.alert("Directions request failed due to " + status);
         }
       }
     );
   }
+
 }
 
 
@@ -124,23 +131,22 @@ export default {
     data(){
       return{
         distance:"",
+       isActive: true,
       }
     },
     mounted(){    
       this.initMap()
     },
-  beforeMount(){
-      // this.initMap()
-  },
+
   methods: {
         initMap() {
  
   const map = new google.maps.Map(document.getElementById("map"), {
     mapTypeControl: false,
-    center: { lat: -33.8688, lng: 151.2195 },
-    zoom: 13,
+    center: { lat: 46.7111, lng: 1.7191},
+    zoom: 6,
   });
-new AutocompleteDirectionsHandler(map);
+new AutocompleteDirectionsHandler(map,this.isActive);
 },
 
   
@@ -173,11 +179,12 @@ new AutocompleteDirectionsHandler(map);
         }
       );
     } else {
-      // Browser doesn't support Geolocation
       handleLocationError(false, infoWindow, map.getCenter());
     }
  
-}
+},
+
+ 
 
 
     
