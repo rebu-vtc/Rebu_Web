@@ -26,9 +26,22 @@
      
     </b-card-text>
 
-    <button id="commande" :disabled="isActive"  variant="primary">Commander votre Rebu</button>
+    <button  v-b-modal.commande  variant="primary">Commander votre Rebu</button>
   </b-card>
 </div>
+ <b-modal id="commande" title="BootstrapVue" hide-footer>
+    <template #modal-title>
+      Veuillez choisir un type de voiture
+    </template>
+    <div class="d-block text-center">
+      <b-form-group label="Voiture" v-slot="{ typeVoiture }">
+      <b-form-radio v-model="selected" :typeVoiture="typeVoiture" name="standard" value="standard">Standard</b-form-radio>
+      <b-form-radio v-model="selected" :typeVoiture="typeVoiture" name="vip" value="vip">VIP</b-form-radio>
+    </b-form-group>
+    </div>
+        <b-button class="mt-3" block @click="hideModal">Suivant</b-button>
+  </b-modal>
+
       <div id="map" style="height:100vh;">
   </div>
 
@@ -39,6 +52,8 @@
 </template>
 
 <script>
+import Header from "../../components/header"
+import Footer from "../../components/footer"
 class AutocompleteDirectionsHandler {
   map;
   originPlaceId;
@@ -46,10 +61,9 @@ class AutocompleteDirectionsHandler {
   travelMode;
   directionsService;
   directionsRenderer;
-  isActive;
-  constructor(map,isActive) {
+
+  constructor(map) {
     this.map = map;
-    this.isActive = isActive
     this.originPlaceId = "";
     this.destinationPlaceId = "";
     this.travelMode = google.maps.TravelMode.DRIVING;
@@ -107,9 +121,7 @@ class AutocompleteDirectionsHandler {
       (response, status) => {
         if (status === "OK") {
           me.directionsRenderer.setDirections(response);
-          console.log(this.isActive)
-          this.isActive = false
-                    console.log(this.isActive)
+             
 
         } else {
           window.alert("Directions request failed due to " + status);
@@ -119,26 +131,28 @@ class AutocompleteDirectionsHandler {
   }
 
 }
-
-
-import Header from "../../components/header"
-import Footer from "../../components/footer"
 export default {
   components: {
     Header,
     Footer,
   },
-    data(){
-      return{
-        distance:"",
-       isActive: true,
+     data() {
+      return {
+        selected: ''
       }
     },
+
     mounted(){    
       this.initMap()
     },
 
   methods: {
+       showModal() {
+        this.$refs['commande'].show()
+      },
+       hideModal() {
+      this.$root.$emit('bv::hide::modal', 'commande', '#btnShow')
+    },
         initMap() {
  
   const map = new google.maps.Map(document.getElementById("map"), {
@@ -146,7 +160,7 @@ export default {
     center: { lat: 46.7111, lng: 1.7191},
     zoom: 6,
   });
-new AutocompleteDirectionsHandler(map,this.isActive);
+new AutocompleteDirectionsHandler(map);
 },
 
   
@@ -218,5 +232,4 @@ new AutocompleteDirectionsHandler(map,this.isActive);
     height: 83%;
 }
 
-      
 </style>

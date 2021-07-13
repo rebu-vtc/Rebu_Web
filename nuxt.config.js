@@ -34,7 +34,7 @@ export default {
   head() {
     return {
       script: [
-        {src: `https://maps.googleapis.com/maps/api/js?key=APIKEYS&libraries=places`}
+        {src: `https://maps.googleapis.com/maps/api/js?key=AIzaSyDJEZ6frZtg6DzKubVE1OCbLgL9hV0kJn0&libraries=places`}
       ]
     };
   },

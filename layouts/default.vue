@@ -7,15 +7,16 @@
   </div>
 </template>
 <script>
-import Popup from '../components/popup';
-import Login from '../components/_Popup/login.vue';
-import Inscription from '../components/_Popup/inscription.vue';
+import Popup from '../components/popup'
+import Login from '../components/_Popup/login.vue'
+import Inscription from '../components/_Popup/inscription.vue'
+
 import { mapGetters } from 'vuex'
 export default {
 	components: {
 		Popup,
 		Login,
-		Inscription
+		Inscription,
 	},
 	computed: {
 		...mapGetters ({
